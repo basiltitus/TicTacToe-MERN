@@ -7,7 +7,8 @@ const User = mongoose.model('User',
     emailId:String,
     imgUrl:String,
     googleId:String,
-    points:Number
+    points:Number,
+    nickName:String
  });
 
  module.exports=User
