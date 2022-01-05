@@ -44,7 +44,7 @@ io.on("connection", function (socket) {
       socket.broadcast.to(player2).emit("GameRequest", player1, player2);
       console.log("Request initiated");
     } else {
-      socket.broadcast.to(player1).emit("INACTIVEOPONENT");
+      io.in(player1).emit("INACTIVEOPONENT");
       console.log("Request declined " + player1);
     }
   });
@@ -56,6 +56,10 @@ io.on("connection", function (socket) {
     console.log("Request rejected by ", player2, " for a game with ", player1);
     socket.broadcast.to(player1).emit("RequestDeclined", player1, player2);
   });
+  socket.on("GetOnlineList",(player1)=>{
+    console.log("retrieving online users by "+player1)
+    io.in(player1).emit("OnlineList",onlineUsers)
+  })
   socket.on("testing", () => {
     console.log("testing");
   });
