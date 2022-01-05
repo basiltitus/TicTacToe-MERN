@@ -17,7 +17,9 @@ io.on("connection", function (socket) {
   console.log("connected");
 
   socket.on("join", (room) => {
-    if (!onlineUsers.includes(room)) onlineUsers.push(room);
+    if (!onlineUsers.includes(room)) {
+      onlineUsers.push(room);
+    }
     console.log(onlineUsers);
     socket.join(room);
   });
