@@ -3,6 +3,7 @@ var cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 const User = require("./Model/User");
+var random_name = require('node-random-name');
 mongoose.connect("mongodb://localhost:27017/TicTacToe");
 
 const app = express();
@@ -149,6 +150,8 @@ app.get("/updatepoints", (req, res) => {
 
 app.get("/updatenickname", (req, res) => {
   const { nickname, email } = req.query;
+  if(nickname=='')
+  console.log(random_name({ last: true }));
   User.find({ nickName: nickname }, (err, data) => {
     if (err) console.log(err);
     else {
@@ -182,7 +185,7 @@ app.get("/checknickname", (req, res) => {
       if (data.length == 0) {
         return res.status(404).send({ data: null, status: 404 });
       } else {
-        return res.status(409).send({ data: data[0], status: 409 });
+        return res.status(200).send({ data: data[0], status: 200 });
       }
     }
   });
