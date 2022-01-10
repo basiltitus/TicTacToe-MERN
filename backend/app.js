@@ -3,16 +3,31 @@ var cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 const User = require("./Model/User");
-var random_name = require('node-random-name');
-mongoose.connect("mongodb://localhost:27017/TicTacToe");
-
+var random_name = require("node-random-name");
+// mongoose.connect("mongodb://localhost:27017/TicTacToe");
+const PORT = process.env.PORT || 5000;
+mongoose.connect(
+  process.env.PORT
+    ? "mongodb+srv://basil:68310111@cluster0.m9syr.mongodb.net/TicTacToe?retryWrites=true&w=majority"
+    : "mongodb://localhost:27017/TicTacToe",
+  {
+    useNewUrlParser: true,
+  }
+);
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: ["https://tictoetic.herokuapp.com"],
+  })
+);
 app.use(express.json());
 const port = 5000;
 
 const http = require("http").Server(app);
-const io = require("socket.io")(http);
+const io = require("socket.io")(http,{ 
+  cors: {
+    origin: 'https://tictoetic.herokuapp.com'
+  }});
 let onlineUsers = [];
 io.on("connection", function (socket) {
   console.log("connected");
@@ -59,10 +74,10 @@ io.on("connection", function (socket) {
     console.log("Request rejected by ", player2, " for a game with ", player1);
     socket.broadcast.to(player1).emit("RequestDeclined", player1, player2);
   });
-  socket.on("GetOnlineList",(player1)=>{
-    console.log("retrieving online users by "+player1)
-    io.in(player1).emit("OnlineList",onlineUsers)
-  })
+  socket.on("GetOnlineList", (player1) => {
+    console.log("retrieving online users by " + player1);
+    io.in(player1).emit("OnlineList", onlineUsers);
+  });
   socket.on("testing", () => {
     console.log("testing");
   });
@@ -88,10 +103,14 @@ io.on("connection", function (socket) {
   socket.on("GameResetByX", (player1, player2) => {
     socket.broadcast.to(player2).emit("GameReset");
   });
+  socket.on("connect_error", (err) => {
+    console.log(`connect_error due to ${err.message}`);
+  });
 });
-io.listen(8000);
+ io.listen(8000);
+// process.env.PORT&&io.listen(PORT);
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.send("Hello World!" + PORT);
 });
 app.post("/login", (req, res) => {
   req.body.points = 0;
@@ -150,8 +169,7 @@ app.get("/updatepoints", (req, res) => {
 
 app.get("/updatenickname", (req, res) => {
   const { nickname, email } = req.query;
-  if(nickname=='')
-  console.log(random_name({ last: true }));
+  if (nickname == "") console.log(random_name({ last: true }));
   User.find({ nickName: nickname }, (err, data) => {
     if (err) console.log(err);
     else {
@@ -191,6 +209,6 @@ app.get("/checknickname", (req, res) => {
   });
 });
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+http.listen(PORT, () => {
+  console.log(`Example app listening at http://localhost:${PORT}`);
 });
